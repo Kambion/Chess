@@ -2,14 +2,14 @@
 
 void Game::Timer::tick() {
 	t2 = SDL_GetTicks();
-	delta = (t2 - t1) * 0.001;
+	delta = (1. * t2 - t1) * 0.001;
 	t1 = t2;
 
 	worldTime += delta;
 
 	fpsTimer += delta;
 	if (fpsTimer > 0.5) {
-		fps = frames * 2;
+		fps = frames * 2.;
 		frames = 0;
 		fpsTimer -= 0.5;
 	}
@@ -25,24 +25,8 @@ void Game::run() {
 }
 
 void Game::mainLoop() {
-	SDL_Event event;
-	bool quit = false;
-	while (!quit) {
-		while (SDL_PollEvent(&event)) {
-			switch (event.type) {
-			case SDL_KEYDOWN:
-				// tu switch
-				if (event.key.keysym.sym == SDLK_ESCAPE) quit = true;
-				break;
-			case SDL_KEYUP:
-				break;
-			case SDL_QUIT:
-				quit = true;
-				break;
-			};
-		};
-		movePiece(5, 7, 1, 3);
-		movePiece(1, 3, 4, 0);
+	while (state == State::GAME) {
+		event();
 		draw();
 	}
 }
@@ -67,6 +51,12 @@ void Game::initBoard() {
 void Game::draw() {
 	window.drawBackground();
 	window.drawBoard();
+	if (selectedPiece) {
+		int x = selectedPiece->getX();
+		int y = selectedPiece->getY();
+		window.highlightTile(x, y, Highlight::GREEN);
+		highlightMoves(selectedPiece);
+	}
 	for (int i = 0; i < 8; i++) {
 		for (int j = 0; j < 8; j++) {
 			Piece* piece = board[j][i].get();
@@ -78,12 +68,62 @@ void Game::draw() {
 	window.update();
 }
 
-void Game::movePiece(int x0, int y0, int x, int y) {
+void Game::movePiece(Piece *piece, int x, int y) {
+	const int x0 = piece->getX(), y0 = piece->getY();
 	if (checkOnBoard(x, y)) {
 		std::unique_ptr<Piece>& piece = board[x0][y0];
 		if (piece && piece->checkMove(x, y)) {
 			piece->move(x, y);
 			board[x][y] = std::move(piece);
+		}
+	}
+}
+
+void Game::event() {
+	SDL_Event event;
+
+	while (SDL_PollEvent(&event)) {
+		switch (event.type) {
+		case SDL_KEYDOWN:
+			switch (event.key.keysym.sym) {
+			case SDLK_ESCAPE:
+				state = State::EXIT;
+				break;
+			}
+			break;
+		case SDL_MOUSEBUTTONDOWN:
+			mouseHandle(event.button.x, event.button.y);
+			break;
+		case SDL_MOUSEBUTTONUP:
+			break;
+		case SDL_KEYUP:
+			break;
+		case SDL_QUIT:
+			state = State::EXIT;
+			break;
+		};
+	};
+}
+
+void Game::mouseHandle(int cx, int cy) {
+	const auto [x, y] = window.mapClick(cx, cy);
+	if (checkOnBoard(x, y)) {
+		if (selectedPiece) {
+				movePiece(selectedPiece, x, y);
+				selectedPiece = nullptr;
+		}
+		else
+			selectedPiece = board[x][y].get();
+	}
+	else
+		selectedPiece = nullptr;
+}
+void Game::highlightMoves(Piece* piece) {
+	for (int i = 0; i < 8; i++) {
+		for (int j = 0; j < 8; j++) {
+			if (piece->checkMove(j, i)) {
+				window.highlightTile(j, i, Highlight::CIRCLE);
+			}
 		}
 	}
 }

@@ -10,6 +10,8 @@ public:
 	
 	Piece(int x, int y, bool color) : x(x), y(y), color(color) {}
 
+	inline int getX() const { return x; }
+	inline int getY() const { return y; }
 	inline bool moved() const { return hasMoved; }
 
 	void move(int xp, int yp);

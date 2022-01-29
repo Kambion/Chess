@@ -1,5 +1,7 @@
 #include "SDLgraphics.hpp"
 
+#pragma warning(disable: 26451)
+
 SDLWindow::SDLWindow(int width, int height, std::string_view title) : w(width), h(height), title(title) {
 	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
 		printf("SDL_Init error: %s\n", SDL_GetError());
@@ -52,9 +54,16 @@ Uint32 SDLWindow::mapColor(int rgb) const {
 	return SDL_MapRGB(screen->format, (rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, (rgb) & 0xFF );
 }
 
+std::pair<int, int> SDLWindow::mapClick(int x, int y) const {
+	const int board_x = (w - boardSize * tileSize) / 2;
+	const int board_y = (h - boardSize * tileSize) / 2;
+
+	return std::make_pair((x - board_x) / tileSize, (y - board_y) / tileSize);
+}
+
 void SDLWindow::drawPixel(int x, int y, Uint32 color) {
 	int bpp = screen->format->BytesPerPixel;
-	Uint8* p = (Uint8*)screen->pixels + y * screen->pitch + x * bpp;
+	Uint8* p = (Uint8*)screen->pixels + (y * screen->pitch + x * bpp);
 	*(Uint32*)p = color;
 }
 
@@ -68,6 +77,16 @@ void SDLWindow::drawLine(int x, int y, int len, int dx, int dy, Uint32 color) {
 
 void SDLWindow::drawRectangle(SDL_Rect rect, Uint32 fillColor) {
 	SDL_FillRect(screen, &rect, fillColor);
+}
+
+void SDLWindow::drawCircle(int x, int y, int radius, int thickness, Uint32 fillColor) {
+	for (int i = std::max(y - radius, 0); i < std::min(y + radius, h); i++) {
+		for (int j = std::max(x - radius, 0); j < std::min(x + radius, w); j++) {
+			int distance = ((j - x) * (j - x) + (i - y) * (i - y));
+			if (distance < radius * radius && distance > (radius-thickness)*(radius-thickness))
+				drawPixel(j, i, fillColor);
+		}
+	}
 }
 
 void SDLWindow::drawBackground() {
@@ -108,8 +127,8 @@ void SDLWindow::drawPiece(int x, int y, int type, int color) {
 }
 void SDLWindow::drawBoard() {
 	constexpr int frameThick = 20;
-	int x = (w - boardSize * tileSize) / 2;
-	int y = (h - boardSize * tileSize) / 2;
+	const int x = (w - boardSize * tileSize) / 2;
+	const int y = (h - boardSize * tileSize) / 2;
 	drawRectangle({ x-frameThick,y-frameThick,tileSize * boardSize + 2*frameThick, tileSize * boardSize + 2*frameThick}, frameThick, colors.dark_gary, colors.white);
 	for (int i = 0; i < boardSize; i++) {
 		for (int j = 0; j < boardSize; j++) {
@@ -137,4 +156,23 @@ void SDLWindow::initColors() {
 	colors.white = mapColor(0xDDDDDD);
 	colors.light_gary = mapColor(0x7E7E7E);
 	colors.dark_gary = mapColor(0x333333);
+	colors.light_red = mapColor(0xFFAAAA);
+	colors.light_green = mapColor(0xAAFFAA);
+}
+
+void SDLWindow::highlightTile(int xp, int yp, Highlight type) {
+	const int x = (w - boardSize * tileSize) / 2;
+	const int y = (h - boardSize * tileSize) / 2;
+	switch (type)
+	{
+	case Highlight::RED:
+		drawRectangle({ x + xp * tileSize, y + yp * tileSize, tileSize, tileSize }, colors.light_red);
+		break;
+	case Highlight::GREEN:
+		drawRectangle({ x + xp * tileSize, y + yp * tileSize, tileSize, tileSize }, colors.light_green);
+		break;
+	case Highlight::CIRCLE:
+		drawCircle(x + (xp+0.5) * tileSize, y + (yp+0.5) * tileSize, tileSize / 4, 5, colors.dark_gary);
+		break;
+	}
 }
