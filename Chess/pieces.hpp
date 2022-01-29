@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 
 class Piece {
 protected:
@@ -10,6 +11,8 @@ public:
 	Piece(int x, int y, bool color) : x(x), y(y), color(color) {}
 
 	inline bool moved() const { return hasMoved; }
+
+	void move(int xp, int yp);
 
 	virtual int bmpOffset() const = 0;
 	virtual bool checkMove(int xp, int yp) const = 0;
@@ -62,3 +65,5 @@ public:
 	inline int bmpOffset() const override { return 4; }
 	bool checkMove(int xp, int yp) const override;
 };
+
+class Wêdzarnicze : public Piece {};

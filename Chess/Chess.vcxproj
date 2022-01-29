@@ -143,11 +143,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="game.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="pieces.cpp" />
     <ClCompile Include="SDLgraphics.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="game.hpp" />
     <ClInclude Include="pieces.hpp" />
     <ClInclude Include="SDLgraphics.hpp" />
   </ItemGroup>
