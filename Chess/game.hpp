@@ -23,6 +23,7 @@ private:
 	Piece* selectedPiece{ nullptr };
 	Timer timer{};
 	State state = State::GAME;
+	PieceColor currentPlayer = PieceColor::WHITE;
 	struct { int white, black; } timeLeft;
 	SDLWindow window{SCREEN_WIDTH, SCREEN_HEIGHT, TITLE};
 public:
@@ -31,8 +32,9 @@ public:
 	void run();
 private:
 	inline constexpr bool checkOnBoard(int x, int y) const { return x >= 0 && y >= 0 && x < 8 && y < 8; }
+	inline void togglePlayer() { currentPlayer = ~currentPlayer; }
 
-	void movePiece(Piece *piece, int x, int y);
+	bool movePiece(Piece *piece, int x, int y);
 	void event();
 	void mouseHandle(int x, int y);
 	void mainLoop();

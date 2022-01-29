@@ -55,10 +55,7 @@ Uint32 SDLWindow::mapColor(int rgb) const {
 }
 
 std::pair<int, int> SDLWindow::mapClick(int x, int y) const {
-	const int board_x = (w - boardSize * tileSize) / 2;
-	const int board_y = (h - boardSize * tileSize) / 2;
-
-	return std::make_pair((x - board_x) / tileSize, (y - board_y) / tileSize);
+	return std::make_pair((x - boardX()) / tileSize, (y - boardY()) / tileSize);
 }
 
 void SDLWindow::drawPixel(int x, int y, Uint32 color) {
@@ -117,18 +114,16 @@ void SDLWindow::drawRectangle(SDL_Rect rect, int thickness, Uint32 outlineColor,
 	//	drawLine(x + thickness, i, w - 2 * thickness, 1, 0, fillColor);
 }
 void SDLWindow::drawPiece(int x, int y, int type, int color) {
-	int xOffset = (w - boardSize * tileSize) / 2;
-	int yOffset = (h - boardSize * tileSize) / 2;
 	int px = type * pieceSize, py = color * pieceSize;
 	SDL_Rect
 		s{ px, py, pieceSize, pieceSize },
-		d{ x * tileSize + xOffset, y * tileSize + yOffset, pieceSize, pieceSize };
+		d{ x * tileSize + boardX(), y * tileSize + boardY(), pieceSize, pieceSize };
 	SDL_BlitSurface(images.pieces, &s, screen, &d);
 }
+
 void SDLWindow::drawBoard() {
 	constexpr int frameThick = 20;
-	const int x = (w - boardSize * tileSize) / 2;
-	const int y = (h - boardSize * tileSize) / 2;
+	const int x = boardX(), y = boardY();
 	drawRectangle({ x-frameThick,y-frameThick,tileSize * boardSize + 2*frameThick, tileSize * boardSize + 2*frameThick}, frameThick, colors.dark_gary, colors.white);
 	for (int i = 0; i < boardSize; i++) {
 		for (int j = 0; j < boardSize; j++) {
@@ -161,8 +156,7 @@ void SDLWindow::initColors() {
 }
 
 void SDLWindow::highlightTile(int xp, int yp, Highlight type) {
-	const int x = (w - boardSize * tileSize) / 2;
-	const int y = (h - boardSize * tileSize) / 2;
+	const int x = boardX(), y = boardY();
 	switch (type)
 	{
 	case Highlight::RED:

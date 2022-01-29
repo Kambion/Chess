@@ -39,6 +39,8 @@ public: //user(debil) mo¿e popsuæ
 	inline int width() const { return w; } 
 	inline int height() const { return h; }
 	inline std::string_view windowTitle() const { return title; }
+	inline int boardX() const { return (w - boardSize * tileSize) / 2;}
+	inline int boardY() const { return (h - boardSize * tileSize) / 2;}
 
 	Uint32 mapColor(int rgb) const;
 	std::pair<int, int> mapClick(int x, int y) const;

@@ -33,18 +33,18 @@ void Game::mainLoop() {
 
 void Game::initBoard() {
 	for (int i = 0; i < 8; i++) {
-		board[i][1] = std::make_unique<Pawn>(i, 1, true);
-		board[i][6] = std::make_unique<Pawn>(i, 6, false);
+		board[i][1] = std::make_unique<Pawn>(i, 1, PieceColor::BLACK);
+		board[i][6] = std::make_unique<Pawn>(i, 6, PieceColor::WHITE);
 	}
 	for (int i = 0; i < 8; i += 7) {
-		board[0][i] = std::make_unique<Rook>(0, i, !(i % 2));
-		board[7][i] = std::make_unique<Rook>(7, i, !(i % 2));
-		board[1][i] = std::make_unique<Knight>(1, i, !(i % 2));
-		board[6][i] = std::make_unique<Knight>(6, i, !(i % 2));
-		board[2][i] = std::make_unique<Bishop>(2, i, !(i % 2));
-		board[5][i] = std::make_unique<Bishop>(5, i, !(i % 2));
-		board[3][i] = std::make_unique<Queen>(3, i, !(i % 2));
-		board[4][i] = std::make_unique<King>(4, i, !(i % 2));
+		board[0][i] = std::make_unique<Rook>(0, i,   pieceColor(!(i % 2)));
+		board[7][i] = std::make_unique<Rook>(7, i,   pieceColor(!(i % 2)));
+		board[1][i] = std::make_unique<Knight>(1, i, pieceColor(!(i % 2)));
+		board[6][i] = std::make_unique<Knight>(6, i, pieceColor(!(i % 2)));
+		board[2][i] = std::make_unique<Bishop>(2, i, pieceColor(!(i % 2)));
+		board[5][i] = std::make_unique<Bishop>(5, i, pieceColor(!(i % 2)));
+		board[3][i] = std::make_unique<Queen>(3, i,  pieceColor(!(i % 2)));
+		board[4][i] = std::make_unique<King>(4, i,   pieceColor(!(i % 2)));
 	}
 }
 
@@ -61,22 +61,24 @@ void Game::draw() {
 		for (int j = 0; j < 8; j++) {
 			Piece* piece = board[j][i].get();
 			if (piece) {
-				window.drawPiece(j, i, piece->bmpOffset(), piece->color);
+				window.drawPiece(j, i, piece->bmpOffset(), piece->color == PieceColor::BLACK);
 			}
 		}
 	}
 	window.update();
 }
 
-void Game::movePiece(Piece *piece, int x, int y) {
+bool Game::movePiece(Piece *piece, int x, int y) {
 	const int x0 = piece->getX(), y0 = piece->getY();
-	if (checkOnBoard(x, y)) {
+	if ((x != x0 || y != y0) && checkOnBoard(x, y)) {
 		std::unique_ptr<Piece>& piece = board[x0][y0];
-		if (piece && piece->checkMove(x, y)) {
+		if (piece && piece->checkMove(x, y) && piece->checkCollision(x, y, board)) {
 			piece->move(x, y);
 			board[x][y] = std::move(piece);
+			return true;
 		}
 	}
+	return false;
 }
 
 void Game::event() {
@@ -107,21 +109,25 @@ void Game::event() {
 
 void Game::mouseHandle(int cx, int cy) {
 	const auto [x, y] = window.mapClick(cx, cy);
+	Piece* p;
 	if (checkOnBoard(x, y)) {
-		if (selectedPiece) {
-				movePiece(selectedPiece, x, y);
-				selectedPiece = nullptr;
+		if (selectedPiece && movePiece(selectedPiece, x, y)) {
+			selectedPiece = nullptr;
+			togglePlayer();
 		}
+		else if ((p = board[x][y].get()) && p->color == currentPlayer)
+			selectedPiece = p;
 		else
-			selectedPiece = board[x][y].get();
+			selectedPiece = nullptr;
 	}
 	else
 		selectedPiece = nullptr;
 }
+
 void Game::highlightMoves(Piece* piece) {
 	for (int i = 0; i < 8; i++) {
 		for (int j = 0; j < 8; j++) {
-			if (piece->checkMove(j, i)) {
+			if (piece->checkMove(j, i) && piece->checkCollision(j, i, board)) {
 				window.highlightTile(j, i, Highlight::CIRCLE);
 			}
 		}
