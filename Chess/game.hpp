@@ -13,13 +13,14 @@ private:
 
 		void tick();
 	};
-	enum class State { MENU, GAME, ENDG, EXIT };
+	enum class State { MENU, GAME, ENDG, EXIT, PROMOTE };
 
 	static constexpr std::string_view TITLE = "CHESS BY KAMBION GAMEDEV COMPANY";
 	static constexpr int SCREEN_WIDTH = 1080;
 	static constexpr int SCREEN_HEIGHT = 720;
 
 	std::unique_ptr<Piece> board[8][8];
+	std::unique_ptr<Piece> choice[4];
 	Piece* selectedPiece{ nullptr };
 	Timer timer{};
 	State state = State::GAME;
@@ -35,10 +36,14 @@ private:
 	inline void togglePlayer() { currentPlayer = ~currentPlayer; }
 
 	bool movePiece(Piece *piece, int x, int y);
-	void event();
+	void event(int x = NULL, int y = NULL);
 	void mouseHandle(int x, int y);
+	void mouseHandleChoice(int x, int y, int mouseX, int mouseY);
+	PieceType choiceLoop(int x, int y, PieceColor color);
 	void mainLoop();
 	void initBoard();
+	void initChoice(int x, int y, PieceColor color);
 	void draw();
+	void drawChoice(int x, int y);
 	void highlightMoves(Piece* piece);
 };

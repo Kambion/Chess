@@ -101,17 +101,6 @@ void SDLWindow::drawRectangle(SDL_Rect rect, int thickness, Uint32 outlineColor,
 	SDL_FillRect(screen, &rect, fillColor);
 	for (const auto &border : borders)
 		SDL_FillRect(screen, &border, outlineColor);
-
-
-	//int i;
-	//for (i = 0; i < thickness; i++) {
-	//	drawLine(x + i, y, h, 0, 1, outlineColor);
-	//	drawLine(x + w - thickness + i, y, h, 0, 1, outlineColor);
-	//	drawLine(x, y + i, w, 1, 0, outlineColor);
-	//	drawLine(x, y + h - thickness + i, l, 1, 0, outlineColor);
-	//}
-	//for (int i = y + thickness; i < y + h - thickness; i++)
-	//	drawLine(x + thickness, i, w - 2 * thickness, 1, 0, fillColor);
 }
 void SDLWindow::drawPiece(int x, int y, int type, int color) {
 	int px = type * pieceSize, py = color * pieceSize;
@@ -131,6 +120,12 @@ void SDLWindow::drawBoard() {
 				drawRectangle({ x + j * tileSize, y + i * tileSize, tileSize, tileSize }, colors.light_gary);
 			}
 		}
+	}
+}
+
+void SDLWindow::drawChoice(int x, int y) {
+	for (int i = -1; i < 3; i++) {
+		drawRectangle({ (x + i) * tileSize + boardX(), y * tileSize + boardY(), tileSize, tileSize }, 2, colors.dark_gary, colors.light_gary);
 	}
 }
 

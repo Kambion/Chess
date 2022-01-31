@@ -102,3 +102,28 @@ bool Queen::checkCollision(int xp, int yp, std::unique_ptr<Piece> board[8][8]) c
 		return true;
 	}
 }
+bool Pawn::checkPromote(int yp) {
+	if ((color == PieceColor::BLACK && yp == 7) || (color == PieceColor::WHITE && yp == 0)) {
+		return true;
+	}
+	return false;
+}
+void Pawn::promote(std::unique_ptr<Piece> board[8][8], PieceType type) {
+	switch (type) {
+	case PieceType::QUEEN:
+		board[x][y] = std::make_unique<Queen>(x, y, color);
+		break;
+	case PieceType::KNIGHT:
+		board[x][y] = std::make_unique<Knight>(x, y, color);
+		break;
+	case PieceType::ROOK:
+		board[x][y] = std::make_unique<Rook>(x, y, color);
+		break;
+	case PieceType::BISHOP:
+		board[x][y] = std::make_unique<Bishop>(x, y, color);
+		break;
+	default:
+		return;
+		break;
+	}
+}

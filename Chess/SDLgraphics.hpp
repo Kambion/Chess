@@ -52,6 +52,7 @@ public: //user(debil) mo¿e popsuæ
 	void drawCircle(int x, int y, int radius, int thickness, Uint32 fillColor);
 	void drawPiece(int x, int y, int type, int color);
 	void drawBoard();
+	void drawChoice(int x, int y);
 	void highlightTile(int xp, int yp, Highlight type);
 	void drawBackground();
 	void update();
