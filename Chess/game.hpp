@@ -37,6 +37,7 @@ private:
 
 	bool movePiece(Piece *piece, int x, int y);
 	void event(int x = NULL, int y = NULL);
+	void resetEnPassant();
 	void mouseHandle(int x, int y);
 	void mouseHandleChoice(int x, int y, int mouseX, int mouseY);
 	PieceType choiceLoop(int x, int y, PieceColor color);

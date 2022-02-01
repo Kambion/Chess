@@ -4,7 +4,7 @@
 constexpr inline short sgn(int x) { return (x > 0) - (x < 0); }
 
 enum class PieceColor { WHITE, BLACK };
-enum class PieceType { PAWN, QUEEN, KING, ROOK, BISHOP, KNIGHT, WÊDZARNICZE };
+enum class PieceType { PAWN, QUEEN, KING, ROOK, BISHOP, KNIGHT, WÊDZARNICZE, PAWNMARKER };
 
 inline PieceColor pieceColor(bool val) {
 	return val ? PieceColor::BLACK : PieceColor::WHITE;
@@ -18,6 +18,7 @@ class Piece {
 protected:
 	int x, y;
 	bool hasMoved = false;
+	bool enPassant = false;
 public:
 	const PieceColor color;
 
@@ -26,6 +27,8 @@ public:
 	inline int getX() const { return x; }
 	inline int getY() const { return y; }
 	inline bool moved() const { return hasMoved; }
+	inline bool passant() const { return enPassant; }
+	inline void resetPassant() { enPassant = false; }
 
 	void move(int xp, int yp);
 

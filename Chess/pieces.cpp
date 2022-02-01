@@ -32,6 +32,8 @@ bool Rook::checkMove(int xp, int yp) const {
 }
 
 void Piece::move(int xp, int yp) {
+	if (type() == PieceType::PAWN && abs(y - yp) == 2)
+		enPassant = true;
 	x = xp;
 	y = yp;
 	hasMoved = true;
@@ -55,6 +57,9 @@ bool Pawn::checkCollision(int xp, int yp, std::unique_ptr<Piece> board[8][8]) co
 		return false;
 	}
 	if (board[xp][yp] && board[xp][yp]->color != color) {
+		return true;
+	}
+	if (board[xp][y] && board[xp][y]->passant()) {
 		return true;
 	}
 	return false;

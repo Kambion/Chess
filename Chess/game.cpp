@@ -79,6 +79,11 @@ bool Game::movePiece(Piece *piece, int x, int y) {
 	if ((x != x0 || y != y0) && checkOnBoard(x, y)) {
 		std::unique_ptr<Piece>& piece = board[x0][y0];
 		if (piece && piece->checkMove(x, y) && piece->checkCollision(x, y, board)) {
+			if (piece->type() == PieceType::PAWN && x != x0) {
+				if (board[x][y0] && board[x][y0]->passant()) {
+					board[x][y0] = nullptr;
+				}
+			}
 			piece->move(x, y);
 			if (piece->checkPromote(y)) {
 				piece->promote(board, choiceLoop(x, y, piece->color));
@@ -132,6 +137,7 @@ void Game::mouseHandle(int cx, int cy) {
 		if (selectedPiece && movePiece(selectedPiece, x, y)) {
 			selectedPiece = nullptr;
 			togglePlayer();
+			resetEnPassant();
 		}
 		else if ((p = board[x][y].get()) && p->color == currentPlayer)
 			selectedPiece = p;
@@ -182,4 +188,13 @@ void Game::drawChoice(int x, int y) {
 		}
 	}
 	window.update();
+}
+void Game::resetEnPassant() {
+	for (int i = 0; i < 8; i++) {
+		for (int j = 0; j < 8; j++) {
+			if (board[j][i] && board[j][i]->color == currentPlayer) {
+				board[j][i]->resetPassant();
+			}
+		}
+	}
 }
