@@ -38,7 +38,7 @@ private:
 	inline constexpr bool checkOnBoard(int x, int y) const { return x >= 0 && y >= 0 && x < 8 && y < 8; }
 	inline void togglePlayer() { currentPlayer = ~currentPlayer; }
 
-	KingPos kingPos(PieceColor color);
+	KingPos kingPos(PieceColor color, std::unique_ptr<Piece> boardToCheck[8][8]);
 	bool movePiece(Piece *piece, int x, int y);
 	void event(int x = NULL, int y = NULL);
 	void resetEnPassant();
@@ -46,10 +46,15 @@ private:
 	void mouseHandleChoice(int x, int y, int mouseX, int mouseY);
 	PieceType choiceLoop(int x, int y, PieceColor color);
 	void mainLoop();
+	void endGameLoop();
 	void initBoard();
 	void initChoice(int x, int y, PieceColor color);
 	void draw();
 	void drawChoice(int x, int y);
-	void highlightMoves(Piece* piece);
+	int highlightMoves(Piece* piece, bool highlight = true);
 	bool checkCheck(PieceColor color);
+	bool checkNextCheck(PieceColor color, int x, int y, int x0, int y0);
+	void copyBoard(std::unique_ptr<Piece> boardCopy[8][8]);
+	bool checkPossibleMoves(PieceColor color);
+	void checkEndGame();
 };

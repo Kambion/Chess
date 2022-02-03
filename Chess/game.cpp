@@ -29,12 +29,49 @@ void Game::mainLoop() {
 	while (state == State::GAME) {
 		event();
 		draw();
-		if (checkCheck(PieceColor::WHITE)) {
-			std::cout << "check\n";
+		checkEndGame();
+	}
+}
+
+void Game::endGameLoop() {
+	while (state == State::ENDG) {
+		draw();
+		SDL_Event event;
+		while (SDL_PollEvent(&event)) {
+			switch (event.type) {
+			case SDL_KEYDOWN:
+				switch (event.key.keysym.sym) {
+				case SDLK_ESCAPE:
+					state = State::EXIT;
+					break;
+				}
+				break;
+			case SDL_KEYUP:
+				break;
+			case SDL_QUIT:
+				state = State::EXIT;
+				break;
+			};
+		};
+	}
+}
+
+void Game::checkEndGame() {
+	if (!checkPossibleMoves(currentPlayer)) {
+		if (checkCheck(currentPlayer)) {
+			switch (currentPlayer) {
+			case PieceColor::WHITE:
+				std::cout << "Bialy przejebal";
+				break;
+			case PieceColor::BLACK:
+				std::cout << "Czarny przejebal";
+				break;
+			}
 		}
 		else {
-			std::cout << "dupa\n";
+			std::cout << "PAT";
 		}
+		state = State::ENDG;
 	}
 }
 
@@ -85,7 +122,7 @@ bool Game::movePiece(Piece *piece, int x, int y) {
 	const int x0 = piece->getX(), y0 = piece->getY();
 	if ((x != x0 || y != y0) && checkOnBoard(x, y)) {
 		std::unique_ptr<Piece>& piece = board[x0][y0];
-		if (piece && piece->checkMove(x, y) && piece->checkCollision(x, y, board)) {
+		if (piece && piece->checkMove(x, y) && piece->checkCollision(x, y, board) && !checkNextCheck(currentPlayer, x, y, x0, y0)) {
 			if (piece->type() == PieceType::PAWN && x != x0) {
 				if (board[x][y0] && board[x][y0]->passant()) {
 					board[x][y0] = nullptr;
@@ -164,14 +201,18 @@ void Game::mouseHandleChoice(int x, int y, int mouseX, int mouseY) {
 		selectedPiece = nullptr;
 }
 
-void Game::highlightMoves(Piece* piece) {
+int Game::highlightMoves(Piece* piece, bool highlight) {
+	int possibleMoves = 0;
 	for (int i = 0; i < 8; i++) {
 		for (int j = 0; j < 8; j++) {
-			if (piece->checkMove(j, i) && piece->checkCollision(j, i, board)) {
-				window.highlightTile(j, i, Highlight::CIRCLE);
+			if (piece->checkMove(j, i) && piece->checkCollision(j, i, board) && !checkNextCheck(currentPlayer, j, i, piece->getX(), piece->getY())) {
+				if(highlight)
+					window.highlightTile(j, i, Highlight::CIRCLE);
+				possibleMoves++;
 			}
 		}
 	}
+	return possibleMoves;
 }
 PieceType Game::choiceLoop(int x, int y, PieceColor color) {
 	state = State::PROMOTE;
@@ -205,11 +246,11 @@ void Game::resetEnPassant() {
 		}
 	}
 }
-Game::KingPos Game::kingPos(PieceColor color) {
+Game::KingPos Game::kingPos(PieceColor color, std::unique_ptr<Piece> boardToCheck[8][8]) {
 	KingPos pos;
 	for (int i = 0; i < 8; i++) {
 		for (int j = 0; j < 8; j++) {
-			if (board[j][i] && board[j][i]->type() == PieceType::KING && board[j][i]->color == color) {
+			if (boardToCheck[j][i] && boardToCheck[j][i]->type() == PieceType::KING && boardToCheck[j][i]->color == color) {
 				pos.x = j;
 				pos.y = i;
 			}
@@ -218,7 +259,7 @@ Game::KingPos Game::kingPos(PieceColor color) {
 	return pos;
 }
 bool Game::checkCheck(PieceColor color) {
-	KingPos pos = kingPos(color);
+	KingPos pos = kingPos(color, board);
 	for (int i = 0; i < 8; i++) {
 		for (int j = 0; j < 8; j++) {
 			if (board[j][i] && board[j][i]->checkMove(pos.x, pos.y) && board[j][i]->checkCollision(pos.x, pos.y, board)) {
@@ -227,4 +268,43 @@ bool Game::checkCheck(PieceColor color) {
 		}
 	}
 	return false;
+}
+bool Game::checkNextCheck(PieceColor color, int x, int y, int x0, int y0) {
+	std::unique_ptr<Piece> boardCopy[8][8];
+	copyBoard(boardCopy);
+	if (boardCopy[x0][y0]->type() == PieceType::PAWN && x != x0) {
+		if (boardCopy[x][y0] && boardCopy[x][y0]->passant()) {
+			boardCopy[x][y0] = nullptr;
+		}
+	}
+	boardCopy[x][y] = std::move(boardCopy[x0][y0]);
+	KingPos pos = kingPos(color, boardCopy);
+	for (int i = 0; i < 8; i++) {
+		for (int j = 0; j < 8; j++) {
+			if (boardCopy[j][i] && boardCopy[j][i]->checkMove(pos.x, pos.y) && boardCopy[j][i]->checkCollision(pos.x, pos.y, boardCopy)) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+void Game::copyBoard(std::unique_ptr<Piece> boardCopy[8][8]) {
+	for (int i = 0; i < 8; i++) {
+		for (int j = 0; j < 8; j++) {
+			if (board[j][i]) {
+				boardCopy[j][i] = board[j][i]->copy();
+			}
+		}
+	}
+}
+bool Game::checkPossibleMoves(PieceColor color) {
+	int possibleMoves = 0;
+	for (int i = 0; i < 8; i++) {
+		for (int j = 0; j < 8; j++) {
+			if (board[j][i] && board[j][i]->color == color) {
+				possibleMoves += highlightMoves(board[j][i].get(), false);
+			}
+		}
+	}
+	return possibleMoves;
 }
