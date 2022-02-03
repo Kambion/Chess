@@ -4,7 +4,7 @@
 constexpr inline short sgn(int x) { return (x > 0) - (x < 0); }
 
 enum class PieceColor { WHITE, BLACK };
-enum class PieceType { PAWN, QUEEN, KING, ROOK, BISHOP, KNIGHT, WÊDZARNICZE, PAWNMARKER };
+enum class PieceType { PAWN, QUEEN, KING, ROOK, BISHOP, KNIGHT, WÊDZARNICZE };
 
 inline PieceColor pieceColor(bool val) {
 	return val ? PieceColor::BLACK : PieceColor::WHITE;

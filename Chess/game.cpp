@@ -1,4 +1,5 @@
 #include "game.hpp"
+#include <iostream>
 
 void Game::Timer::tick() {
 	t2 = SDL_GetTicks();
@@ -28,6 +29,12 @@ void Game::mainLoop() {
 	while (state == State::GAME) {
 		event();
 		draw();
+		if (checkCheck(PieceColor::WHITE)) {
+			std::cout << "check\n";
+		}
+		else {
+			std::cout << "dupa\n";
+		}
 	}
 }
 
@@ -197,4 +204,27 @@ void Game::resetEnPassant() {
 			}
 		}
 	}
+}
+Game::KingPos Game::kingPos(PieceColor color) {
+	KingPos pos;
+	for (int i = 0; i < 8; i++) {
+		for (int j = 0; j < 8; j++) {
+			if (board[j][i] && board[j][i]->type() == PieceType::KING && board[j][i]->color == color) {
+				pos.x = j;
+				pos.y = i;
+			}
+		}
+	}
+	return pos;
+}
+bool Game::checkCheck(PieceColor color) {
+	KingPos pos = kingPos(color);
+	for (int i = 0; i < 8; i++) {
+		for (int j = 0; j < 8; j++) {
+			if (board[j][i] && board[j][i]->checkMove(pos.x, pos.y) && board[j][i]->checkCollision(pos.x, pos.y, board)) {
+				return true;
+			}
+		}
+	}
+	return false;
 }

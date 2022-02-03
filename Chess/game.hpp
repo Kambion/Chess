@@ -5,6 +5,9 @@
 
 class Game {
 private:
+	struct KingPos {
+		int x = 0, y = 0;
+	};
 	struct Timer {
 		int t1, t2 = 0, frames = 0, lastState = 0;
 		double delta = 0, worldTime = 0, fpsTimer = 0, fps = 0;
@@ -35,6 +38,7 @@ private:
 	inline constexpr bool checkOnBoard(int x, int y) const { return x >= 0 && y >= 0 && x < 8 && y < 8; }
 	inline void togglePlayer() { currentPlayer = ~currentPlayer; }
 
+	KingPos kingPos(PieceColor color);
 	bool movePiece(Piece *piece, int x, int y);
 	void event(int x = NULL, int y = NULL);
 	void resetEnPassant();
@@ -47,4 +51,5 @@ private:
 	void draw();
 	void drawChoice(int x, int y);
 	void highlightMoves(Piece* piece);
+	bool checkCheck(PieceColor color);
 };
