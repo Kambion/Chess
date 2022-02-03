@@ -138,11 +138,13 @@ bool Game::movePiece(Piece *piece, int x, int y) {
 				int dx = (x - x0) / 2;
 				if (dx > 0) {
 					if (board[7][y]) {
+						board[7][y]->move((x + x0) / 2, y);
 						board[(x + x0) / 2][y] = std::move(board[7][y]);
 					}
 				}
 				else {
 					if (board[0][y]) {
+						board[0][y]->move((x + x0) / 2, y);
 						board[(x + x0) / 2][y] = std::move(board[0][y]);
 					}
 				}
