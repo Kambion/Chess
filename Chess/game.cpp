@@ -23,6 +23,7 @@ Game::Game(int time) : timeLeft({ time,time }) {
 
 void Game::run() {
 	mainLoop();
+	endGameLoop();
 }
 
 void Game::mainLoop() {
@@ -122,10 +123,28 @@ bool Game::movePiece(Piece *piece, int x, int y) {
 	const int x0 = piece->getX(), y0 = piece->getY();
 	if ((x != x0 || y != y0) && checkOnBoard(x, y)) {
 		std::unique_ptr<Piece>& piece = board[x0][y0];
+		if (piece->type() == PieceType::KING && abs(x - x0) == 2 && y == y0) {
+			if (!checkCastle(piece->color, x, y)) {
+				return false;
+			}
+		}
 		if (piece && piece->checkMove(x, y) && piece->checkCollision(x, y, board) && !checkNextCheck(currentPlayer, x, y, x0, y0)) {
 			if (piece->type() == PieceType::PAWN && x != x0) {
 				if (board[x][y0] && board[x][y0]->passant()) {
 					board[x][y0] = nullptr;
+				}
+			}
+			if (piece->type() == PieceType::KING && abs(x - x0) == 2 && y == y0) {
+				int dx = (x - x0) / 2;
+				if (dx > 0) {
+					if (board[7][y]) {
+						board[(x + x0) / 2][y] = std::move(board[7][y]);
+					}
+				}
+				else {
+					if (board[0][y]) {
+						board[(x + x0) / 2][y] = std::move(board[0][y]);
+					}
 				}
 			}
 			piece->move(x, y);
@@ -203,13 +222,23 @@ void Game::mouseHandleChoice(int x, int y, int mouseX, int mouseY) {
 
 int Game::highlightMoves(Piece* piece, bool highlight) {
 	int possibleMoves = 0;
+	bool castle = false;
 	for (int i = 0; i < 8; i++) {
 		for (int j = 0; j < 8; j++) {
-			if (piece->checkMove(j, i) && piece->checkCollision(j, i, board) && !checkNextCheck(currentPlayer, j, i, piece->getX(), piece->getY())) {
+			if (piece->type() == PieceType::KING && abs(j - piece->getX()) == 2 && piece->getY() == i) {
+				castle = true;
+				if (checkCastle(piece->color, j, piece->getY())) {
+					if (highlight)
+						window.highlightTile(j, i, Highlight::CIRCLE);
+					possibleMoves++;
+				}
+			}
+			if (piece->checkMove(j, i) && piece->checkCollision(j, i, board) && !checkNextCheck(currentPlayer, j, i, piece->getX(), piece->getY()) && !castle) {
 				if(highlight)
 					window.highlightTile(j, i, Highlight::CIRCLE);
 				possibleMoves++;
 			}
+			castle = false;
 		}
 	}
 	return possibleMoves;
@@ -307,4 +336,29 @@ bool Game::checkPossibleMoves(PieceColor color) {
 		}
 	}
 	return possibleMoves;
+}
+bool Game::checkCastle(PieceColor color, int x, int y) {
+	KingPos pos = kingPos(color, board);
+	if (checkCheck(color) || board[pos.x][pos.y]->moved())
+		return false;
+	int dx = (x - pos.x)/2;
+	int tiles = 0;
+	if (dx > 0) {
+		if (!board[7][y] || board[7][y]->type() != PieceType::ROOK || board[7][y]->moved())
+			return false;
+		tiles = 2;
+	}
+	else {
+		if (!board[0][y] || board[0][y]->type() != PieceType::ROOK || board[0][y]->moved())
+			return false;
+		tiles = 3;
+	}
+	for (int i = 1; i <= tiles; i++) {
+		if (board[pos.x + i * dx][y]) {
+			return false;
+		}
+	}
+	if (checkNextCheck(color, (x + pos.x) / 2, y, pos.x, pos.y) || checkNextCheck(color, x, y, pos.x, pos.y))
+		return false;
+	return true;
 }

@@ -54,6 +54,7 @@ private:
 	int highlightMoves(Piece* piece, bool highlight = true);
 	bool checkCheck(PieceColor color);
 	bool checkNextCheck(PieceColor color, int x, int y, int x0, int y0);
+	bool checkCastle(PieceColor color, int x, int y);
 	void copyBoard(std::unique_ptr<Piece> boardCopy[8][8]);
 	bool checkPossibleMoves(PieceColor color);
 	void checkEndGame();
