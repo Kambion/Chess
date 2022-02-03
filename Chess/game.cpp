@@ -301,7 +301,7 @@ bool Game::checkCheck(PieceColor color) {
 bool Game::checkNextCheck(PieceColor color, int x, int y, int x0, int y0) {
 	std::unique_ptr<Piece> boardCopy[8][8];
 	copyBoard(boardCopy);
-	if (boardCopy[x0][y0]->type() == PieceType::PAWN && x != x0) {
+	if (boardCopy[x0][y0] && boardCopy[x0][y0]->type() == PieceType::PAWN && x != x0) {
 		if (boardCopy[x][y0] && boardCopy[x][y0]->passant()) {
 			boardCopy[x][y0] = nullptr;
 		}
