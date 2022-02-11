@@ -50,7 +50,6 @@ SDLWindow::~SDLWindow() {
 	SDL_DestroyTexture(scrtex);
 	SDL_DestroyWindow(window);
 	SDL_DestroyRenderer(renderer);
-	TTF_CloseFont(font);
 	TTF_Quit();
 	SDL_Quit();
 }
@@ -175,7 +174,6 @@ void SDLWindow::highlightTile(int xp, int yp, Highlight type) {
 	}
 }
 void SDLWindow::drawString(int x, int y, std::string text, int fontSize, Fonts fontName, SDL_Color color) {
-	TTF_CloseFont(font);
 	switch (fontName)
 	{
 	case Fonts::SANS:
@@ -194,4 +192,6 @@ void SDLWindow::drawString(int x, int y, std::string text, int fontSize, Fonts f
 	textRect.x = x;
 	textRect.y = y;
 	SDL_BlitSurface(surface, NULL, screen, &textRect);
+	SDL_FreeSurface(surface);
+	TTF_CloseFont(font);
 }
