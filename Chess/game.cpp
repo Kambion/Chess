@@ -102,6 +102,7 @@ void Game::initChoice(int x, int y, PieceColor color) {
 void Game::draw() {
 	window.drawBackground();
 	window.drawBoard();
+	window.drawString(5, 2, "CHESS BY KAMBION", 40, Fonts::ARIAL, { 255, 255, 255 });
 	if (selectedPiece) {
 		int x = selectedPiece->getX();
 		int y = selectedPiece->getY();

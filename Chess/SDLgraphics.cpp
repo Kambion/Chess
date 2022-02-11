@@ -1,4 +1,5 @@
 #include "SDLgraphics.hpp"
+#include <string> 
 
 #pragma warning(disable: 26451)
 
@@ -35,6 +36,8 @@ SDLWindow::SDLWindow(int width, int height, std::string_view title) : w(width), 
 		SDL_TEXTUREACCESS_STREAMING,
 		width, height);
 
+	TTF_Init();
+
 	// !wy³¹czenie widocznoœci kursora myszy
 	SDL_ShowCursor(SDL_ENABLE);
 	initColors();
@@ -47,6 +50,8 @@ SDLWindow::~SDLWindow() {
 	SDL_DestroyTexture(scrtex);
 	SDL_DestroyWindow(window);
 	SDL_DestroyRenderer(renderer);
+	TTF_CloseFont(font);
+	TTF_Quit();
 	SDL_Quit();
 }
 
@@ -121,6 +126,10 @@ void SDLWindow::drawBoard() {
 			}
 		}
 	}
+	for (int i = 0; i < boardSize; i++) {
+		drawString(x - 9 + (i+1)*tileSize, y - 15 + boardSize * tileSize, std::string(1, 'a' + i), 15, Fonts::ARIAL, { 0, 0, 0 });
+		drawString(x + 1, y + 1 + i*tileSize, std::to_string(8-i), 15, Fonts::ARIAL, { 0, 0, 0 });
+	}
 }
 
 void SDLWindow::drawChoice(int x, int y) {
@@ -164,4 +173,25 @@ void SDLWindow::highlightTile(int xp, int yp, Highlight type) {
 		drawCircle(x + (xp+0.5) * tileSize, y + (yp+0.5) * tileSize, tileSize / 4, 5, colors.dark_gary);
 		break;
 	}
+}
+void SDLWindow::drawString(int x, int y, std::string text, int fontSize, Fonts fontName, SDL_Color color) {
+	TTF_CloseFont(font);
+	switch (fontName)
+	{
+	case Fonts::SANS:
+		font = TTF_OpenFont("./fonts/sans.ttf", fontSize);
+		break;
+	case Fonts::COMIC_SANS:
+		font = TTF_OpenFont("./fonts/comic_sans.ttf", fontSize);
+		break;
+	default:
+	case Fonts::ARIAL:
+		font = TTF_OpenFont("./fonts/arial.ttf", fontSize);
+		break;
+	}
+	SDL_Surface* surface = TTF_RenderText_Solid(font, text.c_str(), color);
+	SDL_Rect textRect;
+	textRect.x = x;
+	textRect.y = y;
+	SDL_BlitSurface(surface, NULL, screen, &textRect);
 }

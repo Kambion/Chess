@@ -5,6 +5,7 @@
 #include <utility>
 
 enum class Highlight { RED, GREEN, CIRCLE };
+enum class Fonts {ARIAL, SANS, COMIC_SANS};
 
 class SDLWindow {
 private:	//niezmienne dla user(debil)
@@ -23,6 +24,8 @@ private:	//niezmienne dla user(debil)
 	SDL_Texture* scrtex = nullptr;
 	SDL_Window* window = nullptr;
 	SDL_Renderer* renderer = nullptr;
+	TTF_Font* font = nullptr;
+
 	struct {
 		SDL_Surface
 			* charset = nullptr,
@@ -46,6 +49,7 @@ public: //user(debil) mo¿e popsuæ
 	std::pair<int, int> mapClick(int x, int y) const;
 
 	void drawPixel(int x, int y, Uint32 color);
+	void drawString(int x, int y, std::string text, int fontSize, Fonts fontName, SDL_Color color);
 	void drawLine(int x, int y, int l, int dx, int dy, Uint32 color);
 	void drawRectangle(SDL_Rect rect, Uint32 fillColor);
 	void drawRectangle(SDL_Rect rect, int thickness, Uint32 outlineColor, Uint32 fillColor);
