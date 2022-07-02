@@ -2,47 +2,56 @@
 #include <cmath>
 #include <cstdlib>
 
-bool Pawn::checkMove(int xp, int yp) const {
-	return
-		abs(x - xp) + abs(y - yp) <= 2 &&
-		(y < yp) == (color == PieceColor::BLACK) &&
+bool Pawn::checkMove(int xp, int yp, bool blackUp) const {
+	if(blackUp)
+		return abs(x - xp) + abs(y - yp) <= 2 &&
+			(y < yp) == (color == PieceColor::BLACK) &&
+			y != yp;
+	else
+		return abs(x - xp) + abs(y - yp) <= 2 &&
+		(y > yp) == (color == PieceColor::BLACK) &&
 		y != yp;
 }
 
-bool Bishop::checkMove(int xp, int yp) const {
+bool Bishop::checkMove(int xp, int yp, bool blackUp) const {
 	return abs(x - xp) == abs(y - yp);
 }
 
-bool Knight::checkMove(int xp, int yp) const {
+bool Knight::checkMove(int xp, int yp, bool blackUp) const {
 	return (abs(x - xp) + abs(y - yp) == 3) && x != xp && y != yp;
 }
 
-bool King::checkMove(int xp, int yp) const {
+bool King::checkMove(int xp, int yp, bool blackUp) const {
 	return
 		(abs(x - xp) <= 1 && abs(y - yp) <= 1) ||
 		(!hasMoved && y == yp && abs(x - xp) == 2);
 }
 
-bool Queen::checkMove(int xp, int yp) const {
+bool Queen::checkMove(int xp, int yp, bool blackUp) const {
 	return x == xp || y == yp || abs(x - xp) == abs(y - yp);
 }
 
-bool Rook::checkMove(int xp, int yp) const {
+bool Rook::checkMove(int xp, int yp, bool blackUp) const {
 	return x == xp || y == yp;
 }
 
-void Piece::move(int xp, int yp) {
-	if (type() == PieceType::PAWN && abs(y - yp) == 2)
+void Piece::move(int xp, int yp, bool inGame) {
+	if (type() == PieceType::PAWN && abs(y - yp) == 2 && inGame)
 		enPassant = true;
 	x = xp;
 	y = yp;
-	hasMoved = true;
+	if(inGame)
+		hasMoved = true;
 }
 
-bool Pawn::checkCollision(int xp, int yp, std::unique_ptr<Piece> board[8][8]) const {
-	if (!Piece::checkCollision(xp, yp, board))
+bool Pawn::checkCollision(int xp, int yp, std::unique_ptr<Piece> board[8][8], bool blackUp) const {
+	if (!Piece::checkCollision(xp, yp, board, blackUp))
 		return false;
-	const int dy = (color == PieceColor::BLACK ? 1 : -1);
+	int dy;
+	if(blackUp)
+		dy = (color == PieceColor::BLACK ? 1 : -1);
+	else
+		dy = (color == PieceColor::BLACK ? -1 : 1);
 	if (xp == x) {
 		if (abs(y - yp) == 2) {
 			if (hasMoved)
@@ -64,8 +73,8 @@ bool Pawn::checkCollision(int xp, int yp, std::unique_ptr<Piece> board[8][8]) co
 	}
 	return false;
 }
-bool Bishop::checkCollision(int xp, int yp, std::unique_ptr<Piece> board[8][8]) const {
-	if (!Piece::checkCollision(xp, yp, board))
+bool Bishop::checkCollision(int xp, int yp, std::unique_ptr<Piece> board[8][8], bool blackUp) const {
+	if (!Piece::checkCollision(xp, yp, board, blackUp))
 		return false;
 	for (int i = x, j = y; i != xp; i += sgn(xp - x), j += sgn(yp-y)) {
 		if ((i != x || j != y) && board[i][j]) {
@@ -74,8 +83,8 @@ bool Bishop::checkCollision(int xp, int yp, std::unique_ptr<Piece> board[8][8]) 
 	}
 	return true;
 }
-bool Rook::checkCollision(int xp, int yp, std::unique_ptr<Piece> board[8][8]) const {
-	if (!Piece::checkCollision(xp, yp, board))
+bool Rook::checkCollision(int xp, int yp, std::unique_ptr<Piece> board[8][8], bool blackUp) const {
+	if (!Piece::checkCollision(xp, yp, board, blackUp))
 		return false;
 	const int di = sgn(xp - x), dj = sgn(yp - y);
 	for (int i = x + di, j = y + dj; i != xp || j != yp; i += di, j += dj) {
@@ -86,8 +95,8 @@ bool Rook::checkCollision(int xp, int yp, std::unique_ptr<Piece> board[8][8]) co
 	return true;
 }
 
-bool Queen::checkCollision(int xp, int yp, std::unique_ptr<Piece> board[8][8]) const {
-	if (!Piece::checkCollision(xp, yp, board))
+bool Queen::checkCollision(int xp, int yp, std::unique_ptr<Piece> board[8][8], bool blackUp) const {
+	if (!Piece::checkCollision(xp, yp, board, blackUp))
 		return false;
 	const int di = sgn(xp - x), dj = sgn(yp - y);
 	if (di == 0 || dj == 0) {
@@ -107,9 +116,16 @@ bool Queen::checkCollision(int xp, int yp, std::unique_ptr<Piece> board[8][8]) c
 		return true;
 	}
 }
-bool Pawn::checkPromote(int yp) {
-	if ((color == PieceColor::BLACK && yp == 7) || (color == PieceColor::WHITE && yp == 0)) {
-		return true;
+bool Pawn::checkPromote(int yp, bool blackUp) {
+	if (blackUp) {
+		if ((color == PieceColor::BLACK && yp == 7) || (color == PieceColor::WHITE && yp == 0)) {
+			return true;
+		}
+	}
+	else {
+		if ((color == PieceColor::BLACK && yp == 0) || (color == PieceColor::WHITE && yp == 7)) {
+			return true;
+		}
 	}
 	return false;
 }

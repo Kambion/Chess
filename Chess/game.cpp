@@ -20,6 +20,7 @@ void Game::Timer::tick() {
 
 Game::Game(int time) : timeLeft({ time,time }), points({ 0, 0 }) {
 	initBoard();
+	
 }
 
 void Game::run() {
@@ -108,7 +109,7 @@ void Game::initChoice(int x, int y, PieceColor color) {
 
 void Game::draw() {
 	window.drawBackground();
-	window.drawBoard();
+	window.drawBoard(blackUP);
 	//window.drawString(600, 2, "CHESS BY KAMBION", 40, Fonts::ARIAL, { 255, 255, 255 })
 	if (selectedPiece) {
 		int x = selectedPiece->getX();
@@ -125,19 +126,25 @@ void Game::draw() {
 		}
 	}
 	int i = 0;
+	int blackY = 25;
+	int whiteY = 660;
+	if (!blackUP) {
+		blackY = 660;
+		whiteY = 25;
+	}
 	for (int type : captured.black) {
-		window.drawPieceMin(window.boardX() + i * window.pieceSizeMin, 25, (int)type, 0);
+		window.drawPieceMin(window.boardX() + i * window.pieceSizeMin, blackY, (int)type, 0);
 		i++;
 	}
 	if (points.black > points.white)
-		window.drawString(270 + i*window.pieceSizeMin, 30, "+" + std::to_string(points.black - points.white), 20, Fonts::ARIAL, { 255, 255, 255 });
+		window.drawString(270 + i*window.pieceSizeMin, blackY+5, "+" + std::to_string(points.black - points.white), 20, Fonts::ARIAL, { 255, 255, 255 });
 	i = 0;
 	for (int type : captured.white) {
-		window.drawPieceMin(window.boardX() + i * window.pieceSizeMin, 660, (int)type, 1);
+		window.drawPieceMin(window.boardX() + i * window.pieceSizeMin, whiteY, (int)type, 1);
 		i++;
 	}
 	if (points.black < points.white)
-		window.drawString(270 + i * window.pieceSizeMin, 670, "+" + std::to_string(points.white - points.black), 20, Fonts::ARIAL, { 255, 255, 255 });
+		window.drawString(270 + i * window.pieceSizeMin, whiteY+5, "+" + std::to_string(points.white - points.black), 20, Fonts::ARIAL, { 255, 255, 255 });
 	window.update();
 }
 
@@ -150,7 +157,7 @@ bool Game::movePiece(Piece *piece, int x, int y) {
 				return false;
 			}
 		}
-		if (piece && piece->checkMove(x, y) && piece->checkCollision(x, y, board) && !checkNextCheck(currentPlayer, x, y, x0, y0)) {
+		if (piece && piece->checkMove(x, y, blackUP) && piece->checkCollision(x, y, board, blackUP) && !checkNextCheck(currentPlayer, x, y, x0, y0)) {
 			if (piece->type() == PieceType::PAWN && x != x0) {
 				if (board[x][y0] && board[x][y0]->passant()) { //bicie passata
 					if (currentPlayer == PieceColor::WHITE) {
@@ -158,7 +165,7 @@ bool Game::movePiece(Piece *piece, int x, int y) {
 						points.white += board[x][y0]->getValue();
 					}
 					else {
-						captured.black.push_back(board[x][y]->bmpOffset());
+						captured.black.push_back(board[x][y0]->bmpOffset());
 						points.black += board[x][y0]->getValue();
 					}
 					board[x][y0] = nullptr;
@@ -180,7 +187,7 @@ bool Game::movePiece(Piece *piece, int x, int y) {
 				}
 			}
 			piece->move(x, y);
-			if (piece->checkPromote(y)) {
+			if (piece->checkPromote(y, blackUP)) {
 				piece->promote(board, choiceLoop(x, y, piece->color));
 				board[x0][y0] = nullptr;
 			}
@@ -244,6 +251,7 @@ void Game::mouseHandle(int cx, int cy) {
 			selectedPiece = nullptr;
 			togglePlayer();
 			resetEnPassant();
+			changeRotation();
 		}
 		else if ((p = board[x][y].get()) && p->color == currentPlayer)
 			selectedPiece = p;
@@ -276,7 +284,7 @@ int Game::highlightMoves(Piece* piece, bool highlight) {
 					possibleMoves++;
 				}
 			}
-			if (piece->checkMove(j, i) && piece->checkCollision(j, i, board) && !checkNextCheck(currentPlayer, j, i, piece->getX(), piece->getY()) && !castle) {
+			if (piece->checkMove(j, i, blackUP) && piece->checkCollision(j, i, board, blackUP) && !checkNextCheck(currentPlayer, j, i, piece->getX(), piece->getY()) && !castle) {
 				if(highlight)
 					window.highlightTile(j, i, Highlight::CIRCLE);
 				possibleMoves++;
@@ -334,7 +342,7 @@ bool Game::checkCheck(PieceColor color) {
 	KingPos pos = kingPos(color, board);
 	for (int i = 0; i < 8; i++) {
 		for (int j = 0; j < 8; j++) {
-			if (board[j][i] && board[j][i]->checkMove(pos.x, pos.y) && board[j][i]->checkCollision(pos.x, pos.y, board)) {
+			if (board[j][i] && board[j][i]->checkMove(pos.x, pos.y, blackUP) && board[j][i]->checkCollision(pos.x, pos.y, board, blackUP)) {
 				return true;
 			}
 		}
@@ -353,7 +361,7 @@ bool Game::checkNextCheck(PieceColor color, int x, int y, int x0, int y0) {
 	KingPos pos = kingPos(color, boardCopy);
 	for (int i = 0; i < 8; i++) {
 		for (int j = 0; j < 8; j++) {
-			if (boardCopy[j][i] && boardCopy[j][i]->checkMove(pos.x, pos.y) && boardCopy[j][i]->checkCollision(pos.x, pos.y, boardCopy)) {
+			if (boardCopy[j][i] && boardCopy[j][i]->checkMove(pos.x, pos.y, blackUP) && boardCopy[j][i]->checkCollision(pos.x, pos.y, boardCopy, blackUP)) {
 				return true;
 			}
 		}
@@ -389,12 +397,18 @@ bool Game::checkCastle(PieceColor color, int x, int y) {
 	if (dx > 0) {
 		if (!board[7][y] || board[7][y]->type() != PieceType::ROOK || board[7][y]->moved())
 			return false;
-		tiles = 2;
+		if (blackUP)
+			tiles = 2;
+		else
+			tiles = 3;
 	}
 	else {
 		if (!board[0][y] || board[0][y]->type() != PieceType::ROOK || board[0][y]->moved())
 			return false;
-		tiles = 3;
+		if (blackUP)
+			tiles = 3;
+		else
+			tiles = 2;
 	}
 	for (int i = 1; i <= tiles; i++) {
 		if (board[pos.x + i * dx][y]) {
@@ -404,4 +418,26 @@ bool Game::checkCastle(PieceColor color, int x, int y) {
 	if (checkNextCheck(color, (x + pos.x) / 2, y, pos.x, pos.y) || checkNextCheck(color, x, y, pos.x, pos.y))
 		return false;
 	return true;
+}
+
+void Game::changeRotation() {
+	blackUP = !blackUP;
+	rotateBoard();
+}
+
+void Game::rotateBoard() {
+	std::unique_ptr<Piece> boardCopy[8][8];
+	for (int i = 0; i < 8; i++) {
+		for (int j = 0; j < 8; j++) {
+			if (board[i][j] != nullptr) {
+				board[i][j]->move(7-i, 7-j, false);
+			}
+			boardCopy[i][j] = move(board[i][j]);
+		}
+	}
+	for (int i = 0; i < 8; i++) {
+		for (int j = 0; j < 8; j++) {
+			board[i][j] = move(boardCopy[7-i][7-j]);
+		}
+	}
 }

@@ -122,7 +122,7 @@ void SDLWindow::drawPieceMin(int x, int y, int type, int color) {
 	SDL_BlitSurface(images.piecesMin, &s, screen, &d);
 }
 
-void SDLWindow::drawBoard() {
+void SDLWindow::drawBoard(bool blackUP) {
 	constexpr int frameThick = 20;
 	const int x = boardX(), y = boardY();
 	drawRectangle({ x-frameThick,y-frameThick,tileSize * boardSize + 2*frameThick, tileSize * boardSize + 2*frameThick}, frameThick, colors.dark_gary, colors.white);
@@ -134,8 +134,15 @@ void SDLWindow::drawBoard() {
 		}
 	}
 	for (int i = 0; i < boardSize; i++) {
-		drawString(x - 9 + (i+1)*tileSize, y - 15 + boardSize * tileSize, std::string(1, 'a' + i), 15, Fonts::ARIAL, { 0, 0, 0 });
-		drawString(x + 1, y + 1 + i*tileSize, std::to_string(8-i), 15, Fonts::ARIAL, { 0, 0, 0 });
+		if (blackUP) {
+			drawString(x - 9 + (i + 1) * tileSize, y - 15 + boardSize * tileSize, std::string(1, 'a' + i), 15, Fonts::ARIAL, { 0, 0, 0 });
+			drawString(x + 1, y + 1 + i * tileSize, std::to_string(8 - i), 15, Fonts::ARIAL, { 0, 0, 0 });
+		}
+		else
+		{
+			drawString(x - 9 + (i + 1) * tileSize, y - 15 + boardSize * tileSize, std::string(1, 'h' - i), 15, Fonts::ARIAL, { 0, 0, 0 });
+			drawString(x + 1, y + 1 + i * tileSize, std::to_string(i+1), 15, Fonts::ARIAL, { 0, 0, 0 });
+		}
 	}
 }
 

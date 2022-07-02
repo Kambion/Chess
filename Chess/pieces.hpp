@@ -32,15 +32,15 @@ public:
 	inline bool passant() const { return enPassant; }
 	inline void resetPassant() { enPassant = false; }
 
-	void move(int xp, int yp);
+	void move(int xp, int yp, bool inGame = true);
 
 	virtual int bmpOffset() const = 0;
 	virtual std::unique_ptr<Piece> copy() const = 0;
-	virtual bool checkMove(int xp, int yp) const = 0;
-	virtual inline bool checkCollision(int xp, int yp, std::unique_ptr<Piece> board[8][8]) const { 
+	virtual bool checkMove(int xp, int yp, bool blackUp) const = 0;
+	virtual inline bool checkCollision(int xp, int yp, std::unique_ptr<Piece> board[8][8], bool blackUp) const { 
 		return (!board[xp][yp]) || (board[xp][yp]->color != color); 
 	}
-	virtual inline bool checkPromote(int yp) { return false; }
+	virtual inline bool checkPromote(int yp, bool blackUp) { return false; }
 	virtual inline void promote(std::unique_ptr<Piece> board[8][8], PieceType type) { return; }
 	virtual inline PieceType type() const { return PieceType::WĘDZARNICZE; }
 };
@@ -51,9 +51,9 @@ public:
 
 	inline int bmpOffset() const override { return 5; }
 	inline PieceType type() const override { return PieceType::PAWN; }
-	bool checkMove(int xp, int yp) const override;
-	bool checkCollision(int xp, int yp, std::unique_ptr<Piece> board[8][8]) const override;
-	bool checkPromote(int yp) override;
+	bool checkMove(int xp, int yp, bool blackUp) const override;
+	bool checkCollision(int xp, int yp, std::unique_ptr<Piece> board[8][8], bool blackUp) const override;
+	bool checkPromote(int yp, bool blackUp) override;
 	inline std::unique_ptr<Piece> copy() const override { return std::make_unique<Pawn>(*this); }
 
 	void promote(std::unique_ptr<Piece> board[8][8], PieceType type) override;
@@ -65,8 +65,8 @@ public:
 
 	inline int bmpOffset() const override { return 2; }
 	inline PieceType type() const override { return PieceType::BISHOP; }
-	bool checkMove(int xp, int yp) const override;
-	bool checkCollision(int xp, int yp, std::unique_ptr<Piece> board[8][8]) const override;
+	bool checkMove(int xp, int yp, bool blackUp) const override;
+	bool checkCollision(int xp, int yp, std::unique_ptr<Piece> board[8][8], bool blackUp) const override;
 	inline std::unique_ptr<Piece> copy() const override { return std::make_unique<Bishop>(*this); }
 };
 
@@ -76,7 +76,7 @@ public:
 
 	inline int bmpOffset() const override { return 3; }
 	inline PieceType type() const override { return PieceType::KNIGHT; }
-	bool checkMove(int xp, int yp) const override;
+	bool checkMove(int xp, int yp, bool blackUp) const override;
 	inline std::unique_ptr<Piece> copy() const override { return std::make_unique<Knight>(*this); }
 };
 
@@ -86,7 +86,7 @@ public:
 
 	inline int bmpOffset() const override { return 0; }
 	inline PieceType type() const override { return PieceType::KING; }
-	bool checkMove(int xp, int yp) const override;
+	bool checkMove(int xp, int yp, bool blackUp) const override;
 	inline std::unique_ptr<Piece> copy() const override { return std::make_unique<King>(*this); }
 };
 
@@ -96,8 +96,8 @@ public:
 
 	inline int bmpOffset() const override { return 1; }
 	inline PieceType type() const override { return PieceType::QUEEN; }
-	bool checkMove(int xp, int yp) const override;
-	bool checkCollision(int xp, int yp, std::unique_ptr<Piece> board[8][8]) const override;
+	bool checkMove(int xp, int yp, bool blackUp) const override;
+	bool checkCollision(int xp, int yp, std::unique_ptr<Piece> board[8][8], bool blackUp) const override;
 	inline std::unique_ptr<Piece> copy() const override { return std::make_unique<Queen>(*this); }
 };
 
@@ -107,8 +107,8 @@ public:
 
 	inline int bmpOffset() const override { return 4; }
 	inline PieceType type() const override { return PieceType::ROOK; }
-	bool checkMove(int xp, int yp) const override;
-	bool checkCollision(int xp, int yp, std::unique_ptr<Piece> board[8][8]) const override;
+	bool checkMove(int xp, int yp, bool blackUp) const override;
+	bool checkCollision(int xp, int yp, std::unique_ptr<Piece> board[8][8], bool blackUp) const override;
 	inline std::unique_ptr<Piece> copy() const override { return std::make_unique<Rook>(*this); }
 };
 
@@ -118,6 +118,6 @@ public:
 
 	inline int bmpOffset() const override { return 6; }
 	inline PieceType type() const override { return PieceType::WĘDZARNICZE; }
-	inline bool checkMove(int xp, int yp) const override { return abs(xp % (x + 2) - yp % (y + 1)) > 2; }
+	inline bool checkMove(int xp, int yp, bool blackUp) const override { return abs(xp % (x + 2) - yp % (y + 1)) > 2; }
 	inline std::unique_ptr<Piece> copy() const override { return std::make_unique<Wędzarnicze>(*this); }
 };

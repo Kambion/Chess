@@ -25,6 +25,7 @@ private:
 
 	std::unique_ptr<Piece> board[8][8];
 	std::unique_ptr<Piece> choice[4];
+	bool blackUP = true;
 	struct { int white, black; } points;
 	struct { std::list<int> white; std::list<int> black; } captured;
 	Piece* selectedPiece{ nullptr };
@@ -61,4 +62,6 @@ private:
 	void copyBoard(std::unique_ptr<Piece> boardCopy[8][8]);
 	bool checkPossibleMoves(PieceColor color);
 	void checkEndGame();
+	void rotateBoard();
+	void changeRotation();
 };
