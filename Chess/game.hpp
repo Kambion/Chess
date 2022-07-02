@@ -2,6 +2,7 @@
 #include <memory>
 #include "pieces.hpp"
 #include "SDLgraphics.hpp"
+#include <list>
 
 class Game {
 private:
@@ -25,6 +26,7 @@ private:
 	std::unique_ptr<Piece> board[8][8];
 	std::unique_ptr<Piece> choice[4];
 	struct { int white, black; } points;
+	struct { std::list<int> white; std::list<int> black; } captured;
 	Piece* selectedPiece{ nullptr };
 	Timer timer{};
 	State state = State::GAME;

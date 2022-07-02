@@ -46,6 +46,7 @@ SDLWindow::SDLWindow(int width, int height, std::string_view title) : w(width), 
 SDLWindow::~SDLWindow() {
 	SDL_FreeSurface(images.charset);
 	SDL_FreeSurface(images.pieces);
+	SDL_FreeSurface(images.piecesMin);
 	SDL_FreeSurface(screen);
 	SDL_DestroyTexture(scrtex);
 	SDL_DestroyWindow(window);
@@ -113,6 +114,13 @@ void SDLWindow::drawPiece(int x, int y, int type, int color) {
 		d{ x * tileSize + boardX(), y * tileSize + boardY(), pieceSize, pieceSize };
 	SDL_BlitSurface(images.pieces, &s, screen, &d);
 }
+void SDLWindow::drawPieceMin(int x, int y, int type, int color) {
+	int px = type * pieceSizeMin, py = color * pieceSizeMin;
+	SDL_Rect
+		s{ px, py, pieceSizeMin, pieceSizeMin },
+		d{ x, y, pieceSizeMin, pieceSizeMin };
+	SDL_BlitSurface(images.piecesMin, &s, screen, &d);
+}
 
 void SDLWindow::drawBoard() {
 	constexpr int frameThick = 20;
@@ -147,7 +155,8 @@ bool SDLWindow::loadImages() {
 	images.charset = SDL_LoadBMP(charsetName);
 	images.pieces = SDL_LoadBMP(piecesName);
 	images.background = SDL_LoadBMP(backgroundName);
-	return (images.charset && images.pieces && images.background);
+	images.piecesMin = SDL_LoadBMP(piecesMinName);
+	return (images.charset && images.pieces && images.background && images.piecesMin);
 }
 
 void SDLWindow::initColors() {

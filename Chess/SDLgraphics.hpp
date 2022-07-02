@@ -15,7 +15,8 @@ private:	//niezmienne dla user(debil)
 	static constexpr char
 		backgroundName[] = "background.bmp",
 		charsetName[] = "cs8x8.bmp",
-		piecesName[] = "pieces.bmp";
+		piecesName[] = "pieces.bmp",
+		piecesMinName[] = "pieces_min.bmp";
 
 	int w, h;
 	std::string_view title;
@@ -31,13 +32,16 @@ private:	//niezmienne dla user(debil)
 			* charset = nullptr,
 			* pieces = nullptr,
 			* background = nullptr,
-			* deskaRustykalna03NaŚcianęJasnyBrąz = nullptr;
+			* deskaRustykalna03NaŚcianęJasnyBrąz = nullptr,
+			* piecesMin = nullptr;
 	} images;
 	struct {
 		Uint32 white{}, light_gary{}, dark_gary{}, light_red{}, light_green{};
 	} colors;
 public: //user(debil) może popsuć
 	SDLWindow(int width, int height, std::string_view title);
+
+	static constexpr int pieceSizeMin = 35;
 
 	inline int width() const { return w; } 
 	inline int height() const { return h; }
@@ -55,6 +59,7 @@ public: //user(debil) może popsuć
 	void drawRectangle(SDL_Rect rect, int thickness, Uint32 outlineColor, Uint32 fillColor);
 	void drawCircle(int x, int y, int radius, int thickness, Uint32 fillColor);
 	void drawPiece(int x, int y, int type, int color);
+	void drawPieceMin(int x, int y, int type, int color);
 	void drawBoard();
 	void drawChoice(int x, int y);
 	void highlightTile(int xp, int yp, Highlight type);

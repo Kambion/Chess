@@ -109,15 +109,7 @@ void Game::initChoice(int x, int y, PieceColor color) {
 void Game::draw() {
 	window.drawBackground();
 	window.drawBoard();
-	//window.drawString(600, 2, "CHESS BY KAMBION", 40, Fonts::ARIAL, { 255, 255, 255 });
-	if(points.black > points.white)
-		window.drawString(250, 30, "+" + std::to_string(points.black - points.white), 20, Fonts::ARIAL, {255, 255, 255});
-	else if(points.black != points.white)
-		window.drawString(250, 670, "+" + std::to_string(points.white - points.black), 20, Fonts::ARIAL, {255, 255, 255});
-	else {
-		window.drawString(250, 30, "0", 20, Fonts::ARIAL, { 255, 255, 255 });
-		window.drawString(250, 670, "0", 20, Fonts::ARIAL, {255, 255, 255});
-	}
+	//window.drawString(600, 2, "CHESS BY KAMBION", 40, Fonts::ARIAL, { 255, 255, 255 })
 	if (selectedPiece) {
 		int x = selectedPiece->getX();
 		int y = selectedPiece->getY();
@@ -132,6 +124,20 @@ void Game::draw() {
 			}
 		}
 	}
+	int i = 0;
+	for (int type : captured.black) {
+		window.drawPieceMin(window.boardX() + i * window.pieceSizeMin, 25, (int)type, 0);
+		i++;
+	}
+	if (points.black > points.white)
+		window.drawString(270 + i*window.pieceSizeMin, 30, "+" + std::to_string(points.black - points.white), 20, Fonts::ARIAL, { 255, 255, 255 });
+	i = 0;
+	for (int type : captured.white) {
+		window.drawPieceMin(window.boardX() + i * window.pieceSizeMin, 660, (int)type, 1);
+		i++;
+	}
+	if (points.black < points.white)
+		window.drawString(270 + i * window.pieceSizeMin, 670, "+" + std::to_string(points.white - points.black), 20, Fonts::ARIAL, { 255, 255, 255 });
 	window.update();
 }
 
@@ -148,9 +154,11 @@ bool Game::movePiece(Piece *piece, int x, int y) {
 			if (piece->type() == PieceType::PAWN && x != x0) {
 				if (board[x][y0] && board[x][y0]->passant()) { //bicie passata
 					if (currentPlayer == PieceColor::WHITE) {
+						captured.white.push_back(board[x][y0]->bmpOffset());
 						points.white += board[x][y0]->getValue();
 					}
 					else {
+						captured.black.push_back(board[x][y]->bmpOffset());
 						points.black += board[x][y0]->getValue();
 					}
 					board[x][y0] = nullptr;
@@ -179,9 +187,11 @@ bool Game::movePiece(Piece *piece, int x, int y) {
 			else {
 				if (board[x][y] != nullptr) { //zwykłe bicie
 					if (currentPlayer == PieceColor::WHITE) {
+						captured.white.push_back(board[x][y]->bmpOffset());
 						points.white += board[x][y]->getValue();
 					}
 					else {
+						captured.black.push_back(board[x][y]->bmpOffset());
 						points.black += board[x][y]->getValue();
 					}
 				}
