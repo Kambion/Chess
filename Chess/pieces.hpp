@@ -1,10 +1,10 @@
-#pragma once
+ï»¿#pragma once
 #include <memory>
 
 constexpr inline short sgn(int x) { return (x > 0) - (x < 0); }
 
 enum class PieceColor { WHITE, BLACK };
-enum class PieceType { PAWN, QUEEN, KING, ROOK, BISHOP, KNIGHT, WÊDZARNICZE };
+enum class PieceType { PAWN, QUEEN, KING, ROOK, BISHOP, KNIGHT, WÄ˜DZARNICZE };
 
 inline PieceColor pieceColor(bool val) {
 	return val ? PieceColor::BLACK : PieceColor::WHITE;
@@ -17,6 +17,7 @@ inline PieceColor operator~(const PieceColor& pc) {
 class Piece {
 protected:
 	int x, y;
+	int value;
 	bool hasMoved = false;
 	bool enPassant = false;
 public:
@@ -26,6 +27,7 @@ public:
 
 	inline int getX() const { return x; }
 	inline int getY() const { return y; }
+	inline int getValue() const { return value; }
 	inline bool moved() const { return hasMoved; }
 	inline bool passant() const { return enPassant; }
 	inline void resetPassant() { enPassant = false; }
@@ -40,12 +42,12 @@ public:
 	}
 	virtual inline bool checkPromote(int yp) { return false; }
 	virtual inline void promote(std::unique_ptr<Piece> board[8][8], PieceType type) { return; }
-	virtual inline PieceType type() const { return PieceType::WÊDZARNICZE; }
+	virtual inline PieceType type() const { return PieceType::WÄ˜DZARNICZE; }
 };
 
 class Pawn : public Piece {
 public:
-	Pawn(int x, int y, PieceColor color) : Piece(x, y, color) {}
+	Pawn(int x, int y, PieceColor color) : Piece(x, y, color) { value = 1; }
 
 	inline int bmpOffset() const override { return 5; }
 	inline PieceType type() const override { return PieceType::PAWN; }
@@ -59,7 +61,7 @@ public:
 
 class Bishop : public Piece {
 public:
-	Bishop(int x, int y, PieceColor color) : Piece(x, y, color) {}
+	Bishop(int x, int y, PieceColor color) : Piece(x, y, color) { value = 3; }
 
 	inline int bmpOffset() const override { return 2; }
 	inline PieceType type() const override { return PieceType::BISHOP; }
@@ -70,7 +72,7 @@ public:
 
 class Knight : public Piece {
 public:
-	Knight(int x, int y, PieceColor color) : Piece(x, y, color) {}
+	Knight(int x, int y, PieceColor color) : Piece(x, y, color) { value = 3; }
 
 	inline int bmpOffset() const override { return 3; }
 	inline PieceType type() const override { return PieceType::KNIGHT; }
@@ -80,7 +82,7 @@ public:
 
 class King : public Piece {
 public:
-	King(int x, int y, PieceColor color) : Piece(x, y, color) {}
+	King(int x, int y, PieceColor color) : Piece(x, y, color) { value = 99; }
 
 	inline int bmpOffset() const override { return 0; }
 	inline PieceType type() const override { return PieceType::KING; }
@@ -90,7 +92,7 @@ public:
 
 class Queen : public Piece {
 public:
-	Queen(int x, int y, PieceColor color) : Piece(x, y, color) {}
+	Queen(int x, int y, PieceColor color) : Piece(x, y, color) { value = 9; }
 
 	inline int bmpOffset() const override { return 1; }
 	inline PieceType type() const override { return PieceType::QUEEN; }
@@ -101,7 +103,7 @@ public:
 
 class Rook : public Piece {
 public:
-	Rook(int x, int y, PieceColor color) : Piece(x, y, color) {}
+	Rook(int x, int y, PieceColor color) : Piece(x, y, color) { value = 5; }
 
 	inline int bmpOffset() const override { return 4; }
 	inline PieceType type() const override { return PieceType::ROOK; }
@@ -110,12 +112,12 @@ public:
 	inline std::unique_ptr<Piece> copy() const override { return std::make_unique<Rook>(*this); }
 };
 
-class Wêdzarnicze : public Piece {
+class WÄ™dzarnicze : public Piece {
 public:
-	Wêdzarnicze(int x, int y, PieceColor color) : Piece(x, y, color) {}
+	WÄ™dzarnicze(int x, int y, PieceColor color) : Piece(x, y, color) { value = 12; }
 
 	inline int bmpOffset() const override { return 6; }
-	inline PieceType type() const override { return PieceType::WÊDZARNICZE; }
+	inline PieceType type() const override { return PieceType::WÄ˜DZARNICZE; }
 	inline bool checkMove(int xp, int yp) const override { return abs(xp % (x + 2) - yp % (y + 1)) > 2; }
-	inline std::unique_ptr<Piece> copy() const override { return std::make_unique<Wêdzarnicze>(*this); }
+	inline std::unique_ptr<Piece> copy() const override { return std::make_unique<WÄ™dzarnicze>(*this); }
 };

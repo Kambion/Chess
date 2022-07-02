@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "SDL_common.hpp"
 #include <string_view>
@@ -31,12 +31,12 @@ private:	//niezmienne dla user(debil)
 			* charset = nullptr,
 			* pieces = nullptr,
 			* background = nullptr,
-			* deskaRustykalna03NaŒcianêJasnyBr¹z = nullptr;
+			* deskaRustykalna03NaÅšcianÄ™JasnyBrÄ…z = nullptr;
 	} images;
 	struct {
 		Uint32 white{}, light_gary{}, dark_gary{}, light_red{}, light_green{};
 	} colors;
-public: //user(debil) mo¿e popsuæ
+public: //user(debil) moÅ¼e popsuÄ‡
 	SDLWindow(int width, int height, std::string_view title);
 
 	inline int width() const { return w; } 

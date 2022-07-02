@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <memory>
 #include "pieces.hpp"
 #include "SDLgraphics.hpp"
@@ -24,6 +24,7 @@ private:
 
 	std::unique_ptr<Piece> board[8][8];
 	std::unique_ptr<Piece> choice[4];
+	struct { int white, black; } points;
 	Piece* selectedPiece{ nullptr };
 	Timer timer{};
 	State state = State::GAME;

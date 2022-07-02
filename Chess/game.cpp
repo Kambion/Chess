@@ -1,5 +1,6 @@
-#include "game.hpp"
+﻿#include "game.hpp"
 #include <iostream>
+#include <string>
 
 void Game::Timer::tick() {
 	t2 = SDL_GetTicks();
@@ -17,7 +18,7 @@ void Game::Timer::tick() {
 	frames++;
 }
 
-Game::Game(int time) : timeLeft({ time,time }) {
+Game::Game(int time) : timeLeft({ time,time }), points({ 0, 0 }) {
 	initBoard();
 }
 
@@ -62,14 +63,20 @@ void Game::checkEndGame() {
 		if (checkCheck(currentPlayer)) {
 			switch (currentPlayer) {
 			case PieceColor::WHITE:
-				std::cout << "Bialy przejebal";
+				points.black = 99;
+				points.white = 0;
+				std::cout << "Bialy przegral";
 				break;
 			case PieceColor::BLACK:
-				std::cout << "Czarny przejebal";
+				points.white = 99;
+				points.black = 0;
+				std::cout << "Czarny przegral";
 				break;
 			}
 		}
 		else {
+			points.black = 0;
+			points.white = 0;
 			std::cout << "PAT";
 		}
 		state = State::ENDG;
@@ -102,7 +109,15 @@ void Game::initChoice(int x, int y, PieceColor color) {
 void Game::draw() {
 	window.drawBackground();
 	window.drawBoard();
-	window.drawString(5, 2, "CHESS BY KAMBION", 40, Fonts::ARIAL, { 255, 255, 255 });
+	//window.drawString(600, 2, "CHESS BY KAMBION", 40, Fonts::ARIAL, { 255, 255, 255 });
+	if(points.black > points.white)
+		window.drawString(250, 30, "+" + std::to_string(points.black - points.white), 20, Fonts::ARIAL, {255, 255, 255});
+	else if(points.black != points.white)
+		window.drawString(250, 670, "+" + std::to_string(points.white - points.black), 20, Fonts::ARIAL, {255, 255, 255});
+	else {
+		window.drawString(250, 30, "0", 20, Fonts::ARIAL, { 255, 255, 255 });
+		window.drawString(250, 670, "0", 20, Fonts::ARIAL, {255, 255, 255});
+	}
 	if (selectedPiece) {
 		int x = selectedPiece->getX();
 		int y = selectedPiece->getY();
@@ -131,7 +146,13 @@ bool Game::movePiece(Piece *piece, int x, int y) {
 		}
 		if (piece && piece->checkMove(x, y) && piece->checkCollision(x, y, board) && !checkNextCheck(currentPlayer, x, y, x0, y0)) {
 			if (piece->type() == PieceType::PAWN && x != x0) {
-				if (board[x][y0] && board[x][y0]->passant()) {
+				if (board[x][y0] && board[x][y0]->passant()) { //bicie passata
+					if (currentPlayer == PieceColor::WHITE) {
+						points.white += board[x][y0]->getValue();
+					}
+					else {
+						points.black += board[x][y0]->getValue();
+					}
 					board[x][y0] = nullptr;
 				}
 			}
@@ -155,8 +176,17 @@ bool Game::movePiece(Piece *piece, int x, int y) {
 				piece->promote(board, choiceLoop(x, y, piece->color));
 				board[x0][y0] = nullptr;
 			}
-			else
+			else {
+				if (board[x][y] != nullptr) { //zwykłe bicie
+					if (currentPlayer == PieceColor::WHITE) {
+						points.white += board[x][y]->getValue();
+					}
+					else {
+						points.black += board[x][y]->getValue();
+					}
+				}
 				board[x][y] = std::move(piece);
+			}
 			return true;
 		}
 	}

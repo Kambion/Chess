@@ -1,4 +1,4 @@
-#include "SDLgraphics.hpp"
+Ôªø#include "SDLgraphics.hpp"
 #include <string> 
 
 #pragma warning(disable: 26451)
@@ -9,7 +9,7 @@ SDLWindow::SDLWindow(int width, int height, std::string_view title) : w(width), 
 		return;
 	}
 	int rc;
-	// tryb pe≥noekranowy / fullscreen mode
+	// tryb pe≈Çnoekranowy / fullscreen mode
 	//rc = SDL_CreateWindowAndRenderer(0, 0, SDL_WINDOW_FULLSCREEN_DESKTOP, &window, &renderer);
 	rc = SDL_CreateWindowAndRenderer(width, height, 0, &window, &renderer);
 	if (rc != 0) {
@@ -38,7 +38,7 @@ SDLWindow::SDLWindow(int width, int height, std::string_view title) : w(width), 
 
 	TTF_Init();
 
-	// !wy≥πczenie widocznoúci kursora myszy
+	// !wy≈ÇƒÖczenie widoczno≈õci kursora myszy
 	SDL_ShowCursor(SDL_ENABLE);
 	initColors();
 }

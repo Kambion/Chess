@@ -1,4 +1,4 @@
-#include "game.hpp"
+﻿#include "game.hpp"
 
 #ifdef __cplusplus
 extern "C"
