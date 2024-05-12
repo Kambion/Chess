@@ -1,4 +1,4 @@
-<h1 align="center"><img src="https://github.com/Kambion/Chess/blob/master/icon.png" width="32px"/> Welcome to Chess Game Project</h1>
+<h1 align="center"><img src="https://github.com/Kambion/Chess/blob/master/icon.png" width="64px"/> Welcome to Chess Game Project</h1>
 <p>
   <img alt="Version" src="https://img.shields.io/badge/version-1.0.0-blue.svg?cacheSeconds=2592000" />
   <a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank">
