@@ -6,8 +6,16 @@
   </a>
 </p>
 
+![alt text](https://github.com/Kambion/Chess/blob/master/icon.png?raw=true)
+
 Chess project is a basic chess game coded in C++ with the SDL library. Entire project was created as both a skill-checking exercise and for fun. Project is running on SDL3 and SDL3_ttf library now.
-![alt text](https://github.com/Kambion/Chess/blob/master/screen.png?raw=true)
+
+## Screenshots
+![alt text](https://github.com/Kambion/Chess/blob/master/screenshots/screen.png?raw=true)
+
+![alt text](https://github.com/Kambion/Chess/blob/master/screenshots/screen2.png?raw=true)
+
+![alt text](https://github.com/Kambion/Chess/blob/master/screenshots/screen3.png?raw=true)
 
 ### 🏠 [Homepage](https://github.com/Kambion/Chess)
 
